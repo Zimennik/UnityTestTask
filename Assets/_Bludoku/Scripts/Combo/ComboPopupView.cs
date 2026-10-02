@@ -29,6 +29,11 @@ namespace _Bludoku.Scripts.Combo
             _canvasGroup.blocksRaycasts = false;
         }
 
+        public void SetColor(Color color)
+        {
+            label.color = color;
+        }
+
         public void Show(int level)
         {
             label.text = string.Format(LabelFormat, level);

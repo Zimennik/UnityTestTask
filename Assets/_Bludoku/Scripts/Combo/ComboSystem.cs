@@ -12,7 +12,7 @@ namespace _Bludoku.Scripts.Combo
         public int MovesLeft => MovesToBreak - MovesWithoutClear;
         public bool IsActive => Level >= ActivationLevel;
 
-        private const int ActivationLevel = 2;
+        public const int ActivationLevel = 2;
         private const int MovesToBreak = 3;
 
         public void RegisterMove(bool hasClears)
