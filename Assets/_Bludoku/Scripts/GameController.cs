@@ -1,4 +1,5 @@
 using _Bludoku.Scripts.Boards;
+using _Bludoku.Scripts.Combo;
 using _Bludoku.Scripts.Core;
 using _Bludoku.Scripts.Score;
 using _Bludoku.Scripts.UI;
@@ -11,6 +12,7 @@ namespace _Bludoku.Scripts
         public static GameController Instance { get; private set; }
 
         [SerializeField] private ScoreMediator scoreMediator;
+        [SerializeField] private ComboMediator comboMediator;
         [SerializeField] private UIMediator uiMediator;
         [SerializeField] private Board board;
         [SerializeField] private FiguresController figuresController;
@@ -38,6 +40,7 @@ namespace _Bludoku.Scripts
             figuresController.ResetFigures();
             uiMediator.HideGameOver();
             scoreMediator.ResetScore();
+            comboMediator.ResetCombo();
         }
 
         public void SecondChance()

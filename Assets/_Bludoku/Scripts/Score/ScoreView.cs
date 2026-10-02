@@ -33,6 +33,7 @@ namespace _Bludoku.Scripts.Score
 
         private void AnimateScore()
         {
+            scoreText.transform.DOKill(true);
             scoreText.transform.DOPunchScale(Vector3.one * 0.5f, AnimationDuration, 1, 0.5f);
         }
     }

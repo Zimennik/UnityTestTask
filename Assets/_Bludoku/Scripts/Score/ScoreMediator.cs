@@ -1,4 +1,5 @@
 using _Bludoku.Scripts.Boards;
+using _Bludoku.Scripts.Combo;
 using UnityEngine;
 
 namespace _Bludoku.Scripts.Score
@@ -7,43 +8,42 @@ namespace _Bludoku.Scripts.Score
     {
         [SerializeField] private ScoreView scoreView;
         [SerializeField] private Board board;
-        [SerializeField] private ScoreBoosterView boosterView;
-        
-        private readonly ScoreBoostSystem _scoreBoostSystem = new();
+        [SerializeField] private ComboMediator comboMediator;
 
         private void Awake()
         {
             board.OnFigurePlaced += FigurePlaced;
+            comboMediator.Combo.OnComboIncreased += ComboIncreased;
         }
 
         private void Start()
         {
             ScoreSystem.LoadScore();
-            boosterView.SetBoosterEnabled(ScoreSystem.IsBoosterEnabled);
-            _scoreBoostSystem.IsBoosted = ScoreSystem.IsBoosterEnabled;
             scoreView.UpdateScore(false);
+        }
+
+        private void OnDestroy()
+        {
+            board.OnFigurePlaced -= FigurePlaced;
+            comboMediator.Combo.OnComboIncreased -= ComboIncreased;
         }
 
         public void ResetScore()
         {
             ScoreSystem.ResetScore();
-            UpdateView();
+            scoreView.UpdateScore(false);
         }
 
         private void FigurePlaced(ClearResult result)
         {
-            _scoreBoostSystem.FigurePlaced(result.ClearedCount);
-            boosterView.SetBoosterEnabled(_scoreBoostSystem.IsBoosted);
-            ScoreSystem.SetBoosterEnabled(_scoreBoostSystem.IsBoosted);
-            ScoreSystem.AddSetScore(result.ClearedCount);
+            ScoreSystem.AddClearScore(result.ClearedCount);
             scoreView.UpdateScore();
         }
 
-        private void UpdateView()
+        private void ComboIncreased(int level)
         {
-            boosterView.SetBoosterEnabled(false);
-            _scoreBoostSystem.IsBoosted = false;
-            scoreView.UpdateScore(false);
+            ScoreSystem.AddComboBonus(level);
+            scoreView.UpdateScore();
         }
     }
 }

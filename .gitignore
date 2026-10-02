@@ -104,3 +104,12 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# IDE / AI assistant local settings
+.idea/
+.vscode/
+.junie/
+
+# OS generated files
+.DS_Store
+Thumbs.db
