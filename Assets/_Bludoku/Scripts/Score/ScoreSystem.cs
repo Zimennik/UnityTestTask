@@ -21,14 +21,18 @@ namespace _Bludoku.Scripts.Score
             _highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
         }
 
-        public static void AddClearScore(int clearedCells)
+        public static int AddClearScore(int clearedCells)
         {
-            AddScore(clearedCells * ScorePerCell);
+            var points = clearedCells * ScorePerCell;
+            AddScore(points);
+            return points;
         }
 
-        public static void AddComboBonus(int comboLevel)
+        public static int AddComboBonus(int comboLevel)
         {
-            AddScore(comboLevel * ComboBonusPerLevel);
+            var points = comboLevel * ComboBonusPerLevel;
+            AddScore(points);
+            return points;
         }
         
         public static void AddScore(int score)

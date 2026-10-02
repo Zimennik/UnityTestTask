@@ -9,6 +9,7 @@ namespace _Bludoku.Scripts.Score
         [SerializeField] private ScoreView scoreView;
         [SerializeField] private Board board;
         [SerializeField] private ComboMediator comboMediator;
+        [SerializeField] private ScoreGainView gainView;
 
         private void Awake()
         {
@@ -36,13 +37,13 @@ namespace _Bludoku.Scripts.Score
 
         private void FigurePlaced(ClearResult result)
         {
-            ScoreSystem.AddClearScore(result.ClearedCount);
+            gainView.AddPoints(ScoreSystem.AddClearScore(result.ClearedCount));
             scoreView.UpdateScore();
         }
 
         private void ComboIncreased(int level)
         {
-            ScoreSystem.AddComboBonus(level);
+            gainView.AddPoints(ScoreSystem.AddComboBonus(level));
             scoreView.UpdateScore();
         }
     }

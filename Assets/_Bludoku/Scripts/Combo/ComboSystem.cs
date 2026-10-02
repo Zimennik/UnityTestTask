@@ -9,6 +9,7 @@ namespace _Bludoku.Scripts.Combo
 
         public int Level { get; private set; }
         public int MovesWithoutClear { get; private set; }
+        public int MovesLeft => MovesToBreak - MovesWithoutClear;
         public bool IsActive => Level >= ActivationLevel;
 
         private const int ActivationLevel = 2;

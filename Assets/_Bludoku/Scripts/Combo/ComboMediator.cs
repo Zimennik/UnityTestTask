@@ -1,5 +1,4 @@
 using _Bludoku.Scripts.Boards;
-using _Bludoku.Scripts.Score;
 using UnityEngine;
 
 namespace _Bludoku.Scripts.Combo
@@ -7,7 +6,8 @@ namespace _Bludoku.Scripts.Combo
     public class ComboMediator : MonoBehaviour
     {
         [SerializeField] private Board board;
-        [SerializeField] private ScoreBoosterView boosterView;
+        [SerializeField] private ComboView comboView;
+        [SerializeField] private ComboPopupView popupView;
 
         public ComboSystem Combo { get; } = new();
 
@@ -15,11 +15,12 @@ namespace _Bludoku.Scripts.Combo
         {
             ComboSaveLoad.Load(Combo);
             board.OnFigurePlaced += FigurePlaced;
+            Combo.OnComboIncreased += ComboIncreased;
         }
 
         private void Start()
         {
-            boosterView.SetBoosterEnabled(Combo.IsActive);
+            UpdateView();
         }
 
         private void OnDestroy()
@@ -39,10 +40,21 @@ namespace _Bludoku.Scripts.Combo
             ApplyState();
         }
 
+        private void ComboIncreased(int level)
+        {
+            comboView.PlayLevelUp();
+            popupView.Show(level);
+        }
+
         private void ApplyState()
         {
-            boosterView.SetBoosterEnabled(Combo.IsActive);
+            UpdateView();
             ComboSaveLoad.Save(Combo);
+        }
+
+        private void UpdateView()
+        {
+            comboView.SetState(Combo.IsActive, Combo.Level, Combo.MovesLeft);
         }
     }
 }
