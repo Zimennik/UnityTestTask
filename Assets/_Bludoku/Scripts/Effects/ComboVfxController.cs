@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using _Bludoku.Scripts.Boards;
 using _Bludoku.Scripts.Combo;
 using DG.Tweening;
 using UnityEngine;
@@ -6,12 +8,13 @@ namespace _Bludoku.Scripts.Effects
 {
     public class ComboVfxController : MonoBehaviour
     {
+        [SerializeField] private Board board;
         [SerializeField] private ComboMediator comboMediator;
         [SerializeField] private ComboPopupView popupView;
+        [SerializeField] private Transform cameraTransform;
         [SerializeField] private SpriteRenderer boardGlow;
         [SerializeField] private ParticleSystem sparks;
-        [SerializeField] private ParticleSystem burst;
-        [SerializeField] private Transform cameraTransform;
+        [SerializeField] private ParticleSystem burstPrefab;
 
         [SerializeField] private int maxIntensityLevel = 6;
         [SerializeField] private Color lowIntensityColor = new(0.6f, 0.8f, 1f);
@@ -21,8 +24,8 @@ namespace _Bludoku.Scripts.Effects
         [SerializeField] private float glowPulseDuration = 1.2f;
         [SerializeField] private float minSparksRate = 5f;
         [SerializeField] private float maxSparksRate = 25f;
-        [SerializeField] private int minBurstCount = 15;
-        [SerializeField] private int maxBurstCount = 50;
+        [SerializeField] private int minBurstPerCell = 2;
+        [SerializeField] private int maxBurstPerCell = 5;
         [SerializeField] private float maxShakeStrength = 0.15f;
 
         private const float GlowFadeDuration = 0.8f;
@@ -30,11 +33,14 @@ namespace _Bludoku.Scripts.Effects
         private const float ShakeDuration = 0.3f;
         private const int ShakeVibrato = 20;
 
+        private ParticleSystem _burst;
         private Tween _glowAlphaTween;
         private Tween _glowColorTween;
         private Color _glowColor;
         private float _glowAlpha;
         private Vector3 _cameraPosition;
+        private List<Vector3> _clearedPositions;
+        private float? _pendingBurstIntensity;
 
         private void Awake()
         {
@@ -42,6 +48,7 @@ namespace _Bludoku.Scripts.Effects
             _glowColor = boardGlow.color;
             SetGlowAlpha(0f);
 
+            board.OnFigurePlaced += FigurePlaced;
             comboMediator.Combo.OnComboIncreased += ComboIncreased;
             comboMediator.Combo.OnComboEnded += ComboEnded;
         }
@@ -52,8 +59,18 @@ namespace _Bludoku.Scripts.Effects
                 ApplyIntensity(GetIntensity(comboMediator.Combo.Level));
         }
 
+        private void LateUpdate()
+        {
+            if (_pendingBurstIntensity.HasValue && _clearedPositions != null)
+                PlayBurst(_pendingBurstIntensity.Value, _clearedPositions);
+
+            _pendingBurstIntensity = null;
+            _clearedPositions = null;
+        }
+
         private void OnDestroy()
         {
+            board.OnFigurePlaced -= FigurePlaced;
             comboMediator.Combo.OnComboIncreased -= ComboIncreased;
             comboMediator.Combo.OnComboEnded -= ComboEnded;
 
@@ -62,13 +79,18 @@ namespace _Bludoku.Scripts.Effects
             cameraTransform.DOKill();
         }
 
+        private void FigurePlaced(ClearResult result)
+        {
+            _clearedPositions = result.ClearedPositions;
+        }
+
         private void ComboIncreased(int level)
         {
             var intensity = GetIntensity(level);
 
             ApplyIntensity(intensity);
-            PlayBurst(intensity);
             Shake(intensity);
+            _pendingBurstIntensity = intensity;
         }
 
         private void ComboEnded(int level)
@@ -120,12 +142,21 @@ namespace _Bludoku.Scripts.Effects
                 .SetLoops(-1, LoopType.Yoyo);
         }
 
-        private void PlayBurst(float intensity)
+        private void PlayBurst(float intensity, List<Vector3> positions)
         {
-            var main = burst.main;
-            main.startColor = GetColor(intensity);
+            var burst = GetBurst();
+            var emitParams = new ParticleSystem.EmitParams
+            {
+                startColor = GetColor(intensity),
+                applyShapeToPosition = true
+            };
+            var countPerCell = Mathf.RoundToInt(Mathf.Lerp(minBurstPerCell, maxBurstPerCell, intensity));
 
-            burst.Emit(Mathf.RoundToInt(Mathf.Lerp(minBurstCount, maxBurstCount, intensity)));
+            foreach (var position in positions)
+            {
+                emitParams.position = position;
+                burst.Emit(emitParams, countPerCell);
+            }
         }
 
         private void Shake(float intensity)
@@ -155,6 +186,14 @@ namespace _Bludoku.Scripts.Effects
         private void ApplyGlow()
         {
             boardGlow.color = new Color(_glowColor.r, _glowColor.g, _glowColor.b, _glowAlpha);
+        }
+
+        private ParticleSystem GetBurst()
+        {
+            if (_burst == null)
+                _burst = Instantiate(burstPrefab, board.transform);
+
+            return _burst;
         }
 
         private float GetIntensity(int level)
