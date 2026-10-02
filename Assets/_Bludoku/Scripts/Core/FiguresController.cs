@@ -9,6 +9,9 @@ namespace _Bludoku.Scripts.Core
     public class FiguresController : MonoBehaviour
     {
         public event Action OnGameOver;
+        public event Action<Figure> OnFigurePicked;
+        public event Action<Figure, ClearResult> OnFigurePlaced;
+        public event Action<Figure> OnFigureReturned;
 
         [SerializeField] private Board board;
         [SerializeField] private List<Transform> figurePositions;
@@ -97,6 +100,7 @@ namespace _Bludoku.Scripts.Core
 
         private void FigurePicked(Figure figure)
         {
+            OnFigurePicked?.Invoke(figure);
         }
 
         private void FigureDragged(Figure figure)
@@ -109,9 +113,14 @@ namespace _Bludoku.Scripts.Core
             board.ClearHighlight();
 
             if (board.CanPlaceFigure(figure))
+            {
                 PlaceFigure(figure);
+            }
             else
+            {
                 figure.SnapBack();
+                OnFigureReturned?.Invoke(figure);
+            }
         }
 
         private void RegisterFigure(Figure figure,  int index)
@@ -132,7 +141,8 @@ namespace _Bludoku.Scripts.Core
             figure.OnDragged -= FigureDragged;
             figure.OnReleased -= FigureReleased;
 
-            board.SetFigure(figure);
+            var result = board.SetFigure(figure);
+            OnFigurePlaced?.Invoke(figure, result);
 
             _currentFigures.Remove(figure);
             Destroy(figure.gameObject);

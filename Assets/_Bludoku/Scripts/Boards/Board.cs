@@ -34,7 +34,7 @@ namespace _Bludoku.Scripts.Boards
             _gridView.Build(_grid);
         }
 
-        public int SetFigure(Figure figure)
+        public ClearResult SetFigure(Figure figure)
         {
             Vector2 corner = GetCornerPosition(figure);
             SetGrid((int)corner.x, (int)corner.y, figure.Grid);
@@ -45,7 +45,7 @@ namespace _Bludoku.Scripts.Boards
 
             BoardSaveLoad.Save(_grid);
 
-            return clearResult.ClearedCount;
+            return clearResult;
         }
 
         public void SetCell(int x, int y, int value)
@@ -120,11 +120,11 @@ namespace _Bludoku.Scripts.Boards
 
         public ClearResult CheckAndClear()
         {
-            bool[,] toClear = BuildClearMask(_grid, out var remove);
+            bool[,] toClear = BuildClearMask(_grid, out var clearedSegments);
             var result = new ClearResult
             { 
                 ClearedPositions = new List<Vector3>(),
-                FiguresRemovedCount = remove
+                ClearedSegmentsCount = clearedSegments
             };
 
             for (int row = 0; row < 9; row++)
@@ -185,17 +185,17 @@ namespace _Bludoku.Scripts.Boards
             return new Vector2(xPos, yPos);
         }
 
-        private static bool[,] BuildClearMask(int[,] grid, out int figuresToRemove)
+        private static bool[,] BuildClearMask(int[,] grid, out int completedSegments)
         {
             bool[,] mask = new bool[9, 9];
-            figuresToRemove = 0;
+            completedSegments = 0;
 
             for (int row = 0; row < 9; row++)
             {
                 if (IsRowComplete(grid, row))
                 {
                     MarkRow(mask, row);
-                    figuresToRemove++;
+                    completedSegments++;
                 }
             }
 
@@ -204,7 +204,7 @@ namespace _Bludoku.Scripts.Boards
                 if (IsColumnComplete(grid, col))
                 {
                     MarkColumn(mask, col);
-                    figuresToRemove++;
+                    completedSegments++;
                 }
             }
 
@@ -215,7 +215,7 @@ namespace _Bludoku.Scripts.Boards
                     if (IsBoxComplete(grid, boxRow, boxCol))
                     {
                         MarkBox(mask, boxRow, boxCol);
-                        figuresToRemove++;
+                        completedSegments++;
                     }
                 }
             }

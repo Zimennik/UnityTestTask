@@ -9,6 +9,7 @@ namespace _Bludoku.Scripts.PowerUps
     public class PowerUpMediator : MonoBehaviour
     {
         public event Action<string> OnPowerUpUsed;
+        public event Action<string> OnPowerUpRecharged;
 
         [SerializeField] private Board board;
         [SerializeField] private FiguresController figuresController;
@@ -30,7 +31,7 @@ namespace _Bludoku.Scripts.PowerUps
 
                 slot.button.SetIcon(slot.definition.Icon);
                 charges.OnChanged += () => UpdateView(slot, charges);
-                charges.OnRecharged += slot.button.PlayRecharged;
+                charges.OnRecharged += () => Recharged(slot);
                 slot.button.OnClicked += () => Use(slot, charges);
 
                 _powerUps.Add((slot, charges));
@@ -77,6 +78,12 @@ namespace _Bludoku.Scripts.PowerUps
 
             OnPowerUpUsed?.Invoke(slot.definition.Id);
             slot.definition.Apply(_context);
+        }
+
+        private void Recharged(PowerUpSlot slot)
+        {
+            slot.button.PlayRecharged();
+            OnPowerUpRecharged?.Invoke(slot.definition.Id);
         }
 
         private void FigurePlaced(ClearResult result)

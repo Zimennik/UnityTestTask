@@ -6,7 +6,7 @@ namespace _Bludoku.Scripts.Boards
     public class ClearResult
     {
         public int ClearedCount;
-        public int FiguresRemovedCount;
+        public int ClearedSegmentsCount;
         public List<Vector3> ClearedPositions;
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using _Bludoku.Scripts.Boards;
 using _Bludoku.Scripts.Combo;
 using UnityEngine;
@@ -6,6 +7,8 @@ namespace _Bludoku.Scripts.Score
 {
     public class ScoreMediator : MonoBehaviour
     {
+        public event Action<int> OnComboBonusAwarded;
+
         [SerializeField] private ScoreView scoreView;
         [SerializeField] private Board board;
         [SerializeField] private ComboMediator comboMediator;
@@ -43,8 +46,11 @@ namespace _Bludoku.Scripts.Score
 
         private void ComboIncreased(int level)
         {
-            gainView.AddPoints(ScoreSystem.AddComboBonus(level));
+            var points = ScoreSystem.AddComboBonus(level);
+            gainView.AddPoints(points);
             scoreView.UpdateScore();
+
+            OnComboBonusAwarded?.Invoke(points);
         }
     }
 }
