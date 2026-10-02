@@ -1,6 +1,7 @@
 using _Bludoku.Scripts.Boards;
 using _Bludoku.Scripts.Combo;
 using _Bludoku.Scripts.Core;
+using _Bludoku.Scripts.PowerUps;
 using _Bludoku.Scripts.Score;
 using _Bludoku.Scripts.UI;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace _Bludoku.Scripts
 
         [SerializeField] private ScoreMediator scoreMediator;
         [SerializeField] private ComboMediator comboMediator;
+        [SerializeField] private PowerUpMediator powerUpMediator;
         [SerializeField] private UIMediator uiMediator;
         [SerializeField] private Board board;
         [SerializeField] private FiguresController figuresController;
@@ -41,6 +43,7 @@ namespace _Bludoku.Scripts
             uiMediator.HideGameOver();
             scoreMediator.ResetScore();
             comboMediator.ResetCombo();
+            powerUpMediator.ResetPowerUps();
         }
 
         public void SecondChance()
@@ -51,7 +54,10 @@ namespace _Bludoku.Scripts
 
         private void HandleGameOver()
         {
-            uiMediator.ShowGameOver();
+            if (powerUpMediator.HasReadyPowerUp)
+                powerUpMediator.ShowHint();
+            else
+                uiMediator.ShowGameOver();
         }
     }
 }

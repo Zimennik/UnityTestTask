@@ -69,24 +69,30 @@ namespace _Bludoku.Scripts.Core
 
         public void ResetFigures()
         {
-            foreach (var figure in _currentFigures)
-            {
-                Destroy(figure.gameObject);
-            }
-            _currentFigures.Clear();
-
+            ClearFigures();
             UpdateFigures();
         }
-        
+
+        public void RefreshFigures()
+        {
+            ClearFigures();
+            UpdateFigures();
+            CheckPlaceability();
+        }
+
         public void UpdateToEasyFigures()
+        {
+            ClearFigures();
+            UpdateFigures(1);
+        }
+
+        private void ClearFigures()
         {
             foreach (var figure in _currentFigures)
             {
                 Destroy(figure.gameObject);
             }
             _currentFigures.Clear();
-
-            UpdateFigures(1);
         }
 
         private void FigurePicked(Figure figure)
